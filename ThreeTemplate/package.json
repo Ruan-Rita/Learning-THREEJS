@@ -1,0 +1,16 @@
+{
+  "name": "three_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "start": "parcel index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dat.gui": "^0.7.9",
+    "parcel": "^2.12.0",
+    "three": "^0.163.0"
+  }
+}
