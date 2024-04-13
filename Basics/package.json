@@ -1,0 +1,17 @@
+{
+  "name": "three_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dat.gui": "^0.7.9",
+    "parcel": "^2.12.0",
+    "three": "^0.163.0",
+    "three-addons": "^1.2.0"
+  }
+}
