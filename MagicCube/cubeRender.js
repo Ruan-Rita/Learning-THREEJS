@@ -2,66 +2,318 @@ import * as THREE from 'three'
 
 export default class RenderCube {
 
-    constructor(scene, gui) {
+    options = {
+        "Size": 2,
+        "Spacing": .4,
+        "ActionPurple": false,
+        "ActionRed": false,
+        "ActionGray": false,
+        "ActionBrown": false,
+        "ActionYellow": false,
+        "ActionGreen": false,
+    }
+    margem = this.options.Spacing + this.options.Size
+
+    constructor(scene, gui, camera) {
         this.scene = scene
         this.gui = gui
-        this.options = {
-            "Size": 2,
-            "Spacing": .5
-        }
-        this.margem = this.options.Spacing+ this.options.Size
+        this.camera = camera
         this.gui.add(this.options,"Size",1, 5)
         this.gui.add(this.options,"Spacing",.2, 1)
     }
+    /**
+     * [1] [2] [3]
+     * [4] [A] [6]
+     * [7] [8] [9]
+     */
+    positionAxes = {
+        axesYellow: {
+            1: {x: 0,y: this.margem, z: - this.margem},
+            2: {x: 0,y: this.margem, z: 0},
+            3: {x: 0,y: this.margem, z: this.margem},
+            4: {x: 0,y: 0, z: -this.margem},
+            6: {x: 0,y: 0, z: this.margem},
+            7: {x: 0,y: -this.margem, z: -this.margem},
+            8: {x: 0,y: -this.margem, z: 0},
+            9: {x: 0,y: -this.margem, z: this.margem},
+        },
+        axesPurple: {
+            1: {x: 0,y: this.margem, z: this.margem},
+            2: {x: 0,y: this.margem, z: 0},
+            3: {x: 0,y: this.margem, z: -this.margem},
+            4: {x: 0,y: 0, z: this.margem},
+            6: {x: 0,y: 0, z: -this.margem},
+            7: {x: 0,y: -this.margem, z: this.margem},
+            8: {x: 0,y: -this.margem, z: 0},
+            9: {x: 0,y: -this.margem, z: -this.margem},
+        },
+        axesGray: {
+            1: {x: this.margem, y: 0, z: this.margem},
+            2: {x: this.margem, y: 0, z: 0},
+            3: {x: this.margem, y: 0, z: -this.margem},
+            4: {x: 0, y: 0, z: this.margem},
+            6: {x: 0, y: 0, z: -this.margem},
+            7: {x: -this.margem, y: 0, z: this.margem},
+            8: {x: -this.margem, y: 0, z: 0},
+            9: {x: -this.margem, y: 0, z: -this.margem},
+        },
+        axesRed: {
+            1: {x: -this.margem, y: 0, z: this.margem},
+            2: {x: -this.margem, y: 0, z: 0},
+            3: {x: -this.margem, y: 0, z: -this.margem},
+            4: {x: 0, y: 0, z: this.margem},
+            6: {x: 0, y: 0, z: -this.margem},
+            7: {x: this.margem, y: 0, z: this.margem},
+            8: {x: this.margem, y: 0, z: 0},
+            9: {x: this.margem, y: 0, z: -this.margem},
+        },
+        axesGreen: {
+            1: {x: this.margem,y: this.margem,z: 0},
+            2: {x: 0,y: this.margem,z: 0},
+            3: {x: -this.margem,y: this.margem,z: 0},
+            4: {x: this.margem,y: 0,z: 0},
+            6: {x: -this.margem,y: 0,z: 0},
+            7: {x: this.margem,y: -this.margem,z: 0},
+            8: {x: 0,y: -this.margem,z: 0},
+            9: {x: -this.margem,y: -this.margem,z: 0},
+        },
+        axesBrown: {
+            1: {x: -this.margem,y: this.margem,z: 0},
+            2: {x: 0,y: this.margem,z: 0},
+            3: {x: this.margem,y: this.margem,z: 0},
+            4: {x: -this.margem,y: 0,z: 0},
+            6: {x: this.margem,y: 0,z: 0},
+            7: {x: -this.margem,y: -this.margem,z: 0},
+            8: {x: 0,y: -this.margem,z: 0},
+            9: {x: this.margem,y: -this.margem,z: 0},
+        }
+    }
 
     render() {
-        const mainCube = this.createBox(false, 'black');
-        mainCube.box.material.wireframe = true;
-        this.scene.add(mainCube.box)
+        this.mainCube = this.createBox(false, 'black');
+        this.mainCube.box.material.wireframe = true;
+        this.scene.add(this.mainCube.box)
 
-        const axesRed = this.createBox(mainCube.box, 'red',{x: 0, y: this.margem, z: 0}, true);
-        const axesPurple = this.createBox(mainCube.box, 'purple',{x: this.margem, y: 0, z: 0}, true);
-        const axesGray = this.createBox(mainCube.box, 'gray',{x: 0, y: -this.margem, z: 0}, true);
-        const axesBrown = this.createBox(mainCube.box, 'brown',{x: 0, y: 0, z: this.margem}, true);
-        const axesYellow = this.createBox(mainCube.box, 'yellow',{x: -this.margem, y: 0, z: 0}, true);
-        const axesGreen = this.createBox(mainCube.box, 'green',{x: 0, y: 0, z: -this.margem}, true);
+        this.axesRed = this.createBox(this.mainCube.box, 'red',{x: 0, y: this.margem, z: 0}, true);
+        this.axesPurple = this.createBox(this.mainCube.box, 'purple',{x: this.margem, y: 0, z: 0}, true);
+        this.axesGray = this.createBox(this.mainCube.box, 'gray',{x: 0, y: -this.margem, z: 0}, true);
+        this.axesBrown = this.createBox(this.mainCube.box, 'brown',{x: 0, y: 0, z: this.margem}, true);
+        this.axesYellow = this.createBox(this.mainCube.box, 'yellow',{x: -this.margem, y: 0, z: 0}, true);
+        this.axesGreen = this.createBox(this.mainCube.box, 'green',{x: 0, y: 0, z: -this.margem}, true);
 
         // AxesPurple
-        const box1 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: 0, z: -this.margem});
-        const box2 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: 0, z: this.margem});
-        const box3 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: this.margem, z: 0});
-        const box4 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: -this.margem, z: 0});
-        const box5 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: this.margem, z: this.margem});
-        const box6 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: this.margem, z: -this.margem});
-        const box7 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: -this.margem, z: this.margem});
-        const box8 = this.createBox(axesPurple.axes, 'purple',{x: 0, y: -this.margem, z: -this.margem});
+        this.box1 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[1]);
+        this.box2 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[2]);
+        this.box3 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[3]);
+        this.box4 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[4]);
+        this.box6 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[6]);
+        this.box7 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[7]);
+        this.box8 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[8]);
+        this.box9 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[9]);
 
         // AxesYellow
-        const boxYellow1 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: 0, z: -this.margem});
-        const boxYellow2 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: 0, z: this.margem});
-        const boxYellow3 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: this.margem, z: 0});
-        const boxYellow4 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: -this.margem, z: 0});
-        const boxYellow5 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: this.margem, z: this.margem});
-        const boxYellow6 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: this.margem, z: -this.margem});
-        const boxYellow7 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: -this.margem, z: this.margem});
-        const boxYellow8 = this.createBox(axesYellow.axes, 'yellow',{x: 0, y: -this.margem, z: -this.margem});
+        this.boxYellow1 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[1]);
+        this.boxYellow2 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[2]);
+        this.boxYellow3 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[3]);
+        this.boxYellow4 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[4]);
+        this.boxYellow6 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[6]);
+        this.boxYellow7 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[7]);
+        this.boxYellow8 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[8]);
+        this.boxYellow9 = this.createBox(this.axesYellow.axes, 'yellow',this.positionAxes.axesYellow[9]);
 
         // AxesGreen
-        const boxGreen1 = this.createBox(axesGreen.axes, 'green',{x: 0, y: this.margem, z: 0});
-        const boxGreen2 = this.createBox(axesGreen.axes, 'green',{x: 0, y: -this.margem, z: 0});
+        this.boxGreen2 = this.createBox(this.axesGreen.axes, 'green',this.positionAxes.axesGreen[2]);
+        this.boxGreen8 = this.createBox(this.axesGreen.axes, 'green',this.positionAxes.axesGreen[8]);
 
-        // AxesGray
-        const boxBrown1 = this.createBox(axesBrown.axes, 'brown',{x: 0, y: this.margem, z: 0});
-        const boxBrown2 = this.createBox(axesBrown.axes, 'brown',{x: 0, y: -this.margem, z: 0});
+        // AxesBrown
+        this.boxBrown2 = this.createBox(this.axesBrown.axes, 'brown',this.positionAxes.axesBrown[2]);
+        this.boxBrown8 = this.createBox(this.axesBrown.axes, 'brown',this.positionAxes.axesBrown[8]);
+
+        // test
+
+        this.guiAxesAction()
+
 
         return {
-            axesPurple: axesPurple.axes,
-            axesRed: axesRed.axes,
-            axesGray: axesGray.axes,
-            axesBrown: axesBrown.axes,
-            axesYellow: axesYellow.axes,
-            axesGreen: axesGreen.axes,
+            axesPurple: this.axesPurple.axes,
+            axesRed: this.axesRed.axes,
+            axesGray: this.axesGray.axes,
+            axesBrown: this.axesBrown.axes,
+            axesYellow: this.axesYellow.axes,
+            axesGreen: this.axesGreen.axes,
         }
+    }
+    guiAxesAction() {
+        let zBrown = 0
+        let zRed = 0
+        let zYellow = 0
+        let zPurple = 0
+        let zGray = 0
+        let zGreen = 0
+        const degree = 10;
+
+        this.gui.add(this.options,'ActionPurple').onChange(value => {
+            this.movePurple()
+            zPurple += THREE.MathUtils.degToRad(degree);
+            const euler = new THREE.Euler(zPurple,0,0, "XYZ")
+            this.axesPurple.axes.setRotationFromEuler(euler)
+        });
+        this.gui.add(this.options,'ActionRed').onChange(value => {
+            this.moveRed()
+            zRed += THREE.MathUtils.degToRad(degree);
+            const euler = new THREE.Euler(0,zRed,0, "XYZ")
+            this.axesRed.axes.setRotationFromEuler(euler)
+        });
+        this.gui.add(this.options,'ActionGray').onChange(value => {
+            this.moveGray()
+            zGray += THREE.MathUtils.degToRad(degree);
+            const euler = new THREE.Euler(0,zGray,0, "XYZ")
+            this.axesGray.axes.setRotationFromEuler(euler)
+        });
+        this.gui.add(this.options,'ActionBrown').onChange(value => {
+            this.moveBrown();
+            zBrown += THREE.MathUtils.degToRad(degree);
+            const euler = new THREE.Euler(0,0,zBrown, "XYZ")
+            this.axesBrown.axes.setRotationFromEuler(euler)
+        });
+        this.gui.add(this.options,'ActionYellow').onChange(value => {
+            this.moveYellow()
+            zYellow += THREE.MathUtils.degToRad(degree);
+            const euler = new THREE.Euler(zYellow,0,0, "XYZ")
+            this.axesYellow.axes.setRotationFromEuler(euler)
+        });
+        this.gui.add(this.options,'ActionGreen').onChange(value => {
+            this.moveGreen();
+            zGreen += THREE.MathUtils.degToRad(degree);
+            const euler = new THREE.Euler(0,0,zGreen, "XYZ")
+            this.axesGreen.axes.setRotationFromEuler(euler)
+        });
+    }
+
+    moveBrown() {
+        this.axesBrown.axes.add(this.boxYellow3.box)
+        this.axesBrown.axes.add(this.boxYellow6.box)
+        this.axesBrown.axes.add(this.boxYellow9.box)
+        this.help(this.boxYellow3.box, this.positionAxes.axesBrown[1])
+        this.help(this.boxYellow6.box, this.positionAxes.axesBrown[4])
+        this.help(this.boxYellow9.box, this.positionAxes.axesBrown[7])
+
+        this.axesBrown.axes.add(this.box1.box)
+        this.axesBrown.axes.add(this.box4.box)
+        this.axesBrown.axes.add(this.box7.box)
+        this.help(this.box1.box, this.positionAxes.axesBrown[3])
+        this.help(this.box4.box, this.positionAxes.axesBrown[6])
+        this.help(this.box7.box, this.positionAxes.axesBrown[9])
+
+        this.axesBrown.axes.add(this.boxBrown2)
+        this.axesBrown.axes.add(this.boxBrown8)
+        this.help(this.boxBrown2.box, this.positionAxes.axesBrown[2])
+        this.help(this.boxBrown8.box, this.positionAxes.axesBrown[8])
+    }
+    moveGreen() {
+        this.axesGreen.axes.add(this.boxYellow1.box)
+        this.axesGreen.axes.add(this.boxYellow4.box)
+        this.axesGreen.axes.add(this.boxYellow7.box)
+        this.help(this.boxYellow1.box, this.positionAxes.axesGreen[3])
+        this.help(this.boxYellow4.box, this.positionAxes.axesGreen[6])
+        this.help(this.boxYellow7.box, this.positionAxes.axesGreen[9])
+
+        this.axesGreen.axes.add(this.box3.box)
+        this.axesGreen.axes.add(this.box6.box)
+        this.axesGreen.axes.add(this.box9.box)
+        this.help(this.box3.box, this.positionAxes.axesGreen[1])
+        this.help(this.box6.box, this.positionAxes.axesGreen[4])
+        this.help(this.box9.box, this.positionAxes.axesGreen[7])
+
+        this.axesGreen.axes.add(this.boxGreen2)
+        this.axesGreen.axes.add(this.boxGreen8)
+        this.help(this.boxGreen2.box, this.positionAxes.axesGreen[2])
+        this.help(this.boxGreen8.box, this.positionAxes.axesGreen[8])
+    }
+
+    moveRed() {
+        this.axesRed.axes.add(this.boxYellow1.box)
+        this.axesRed.axes.add(this.boxYellow2.box)
+        this.axesRed.axes.add(this.boxYellow3.box)
+        this.help(this.boxYellow1.box, this.positionAxes.axesRed[3])
+        this.help(this.boxYellow2.box, this.positionAxes.axesRed[2])
+        this.help(this.boxYellow3.box, this.positionAxes.axesRed[1])
+
+        this.axesRed.axes.add(this.box1.box)
+        this.axesRed.axes.add(this.box2.box)
+        this.axesRed.axes.add(this.box3.box)
+        this.help(this.box1.box, this.positionAxes.axesRed[7])
+        this.help(this.box2.box, this.positionAxes.axesRed[8])
+        this.help(this.box3.box, this.positionAxes.axesRed[9])
+
+        this.axesRed.axes.add(this.boxBrown2.box)
+        this.help(this.boxBrown2.box, this.positionAxes.axesRed[4])
+
+        this.axesRed.axes.add(this.boxGreen2.box)
+        this.help(this.boxGreen2.box, this.positionAxes.axesRed[6])
+    }
+    moveGray() {
+        this.axesGray.axes.add(this.boxYellow7.box)
+        this.axesGray.axes.add(this.boxYellow8.box)
+        this.axesGray.axes.add(this.boxYellow9.box)
+        this.help(this.boxYellow7.box, this.positionAxes.axesGray[7])
+        this.help(this.boxYellow8.box, this.positionAxes.axesGray[8])
+        this.help(this.boxYellow9.box, this.positionAxes.axesGray[9])
+
+        this.axesGray.axes.add(this.box7.box)
+        this.axesGray.axes.add(this.box8.box)
+        this.axesGray.axes.add(this.box9.box)
+        this.help(this.box7.box, this.positionAxes.axesGray[1])
+        this.help(this.box8.box, this.positionAxes.axesGray[2])
+        this.help(this.box9.box, this.positionAxes.axesGray[3])
+
+        this.axesGray.axes.add(this.boxBrown8.box)
+        this.help(this.boxBrown8.box, this.positionAxes.axesGray[4])
+
+        this.axesGray.axes.add(this.boxGreen8.box)
+        this.help(this.boxGreen8.box, this.positionAxes.axesGray[6])
+    }
+    movePurple() {
+        this.axesPurple.axes.add(this.box1.box)
+        this.axesPurple.axes.add(this.box2.box)
+        this.axesPurple.axes.add(this.box3.box)
+        this.axesPurple.axes.add(this.box4.box)
+        this.axesPurple.axes.add(this.box6.box)
+        this.axesPurple.axes.add(this.box7.box)
+        this.axesPurple.axes.add(this.box8.box)
+        this.axesPurple.axes.add(this.box9.box)
+        this.help(this.box1.box, this.positionAxes.axesPurple[1])
+        this.help(this.box2.box, this.positionAxes.axesPurple[2])
+        this.help(this.box3.box, this.positionAxes.axesPurple[3])
+        this.help(this.box4.box, this.positionAxes.axesPurple[4])
+        this.help(this.box6.box, this.positionAxes.axesPurple[6])
+        this.help(this.box7.box, this.positionAxes.axesPurple[7])
+        this.help(this.box8.box, this.positionAxes.axesPurple[8])
+        this.help(this.box9.box, this.positionAxes.axesPurple[9])
+    }
+    moveYellow() {
+        this.axesYellow.axes.add(this.boxYellow1.box)
+        this.axesYellow.axes.add(this.boxYellow2.box)
+        this.axesYellow.axes.add(this.boxYellow3.box)
+        this.axesYellow.axes.add(this.boxYellow4.box)
+        this.axesYellow.axes.add(this.boxYellow6.box)
+        this.axesYellow.axes.add(this.boxYellow7.box)
+        this.axesYellow.axes.add(this.boxYellow8.box)
+        this.axesYellow.axes.add(this.boxYellow9.box)
+        this.help(this.boxYellow1.box, this.positionAxes.axesYellow[1])
+        this.help(this.boxYellow2.box, this.positionAxes.axesYellow[2])
+        this.help(this.boxYellow3.box, this.positionAxes.axesYellow[3])
+        this.help(this.boxYellow4.box, this.positionAxes.axesYellow[4])
+        this.help(this.boxYellow6.box, this.positionAxes.axesYellow[6])
+        this.help(this.boxYellow7.box, this.positionAxes.axesYellow[7])
+        this.help(this.boxYellow8.box, this.positionAxes.axesYellow[8])
+        this.help(this.boxYellow9.box, this.positionAxes.axesYellow[9])
+    }
+
+    help(element, position) {
+        element.position.x = position.x
+        element.position.y = position.y
+        element.position.z = position.z
     }
 
 
@@ -90,5 +342,64 @@ export default class RenderCube {
         }
 
         return {box, axes}
+    }
+
+    showLineDirections(directionVector, objectOfInterest) {
+        // Create a LineGeometry to represent the vector as a line
+        var lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), directionVector]);
+
+        // Create a material for the line (you can customize the color and style)
+        var lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Red color
+
+        // Create the line mesh
+        var line = new THREE.Line(lineGeometry, lineMaterial);
+
+        // Add the line to the scene
+        objectOfInterest.add(line);
+    }
+
+    getNearestObject(objectOfInterest) {
+        // Get the position of the object
+        var origin = new THREE.Vector3();
+        objectOfInterest.getWorldPosition(origin);
+
+        // Define directions (8 directions)
+        var directions = [
+            new THREE.Vector3(0, -30, 0), // Forward
+            new THREE.Vector3(0, 30, 0), // Backward
+            new THREE.Vector3(30, 0, 0), // Right
+            new THREE.Vector3(-30, 0, 0), // Left
+            new THREE.Vector3(30, -30, 0), // Forward Right
+            new THREE.Vector3(-30, -30, 0), // Forward Left
+            new THREE.Vector3(30, 30, 0), // Backward Right
+            new THREE.Vector3(-30, 30, 0) // Backward Left
+        ];
+
+        // Array to hold intersection results
+        var allIntersections = [];
+
+        // Iterate over each direction
+        for (var i = 0; i < directions.length; i++) {
+            // Create a raycaster from the object's position in the current direction
+            var raycaster = new THREE.Raycaster(origin, directions[i],0, 100);
+            // this.showLineDirections(directions[i], objectOfInterest)
+            // Find intersections with scene objects
+            var intersects = raycaster.intersectObjects(this.scene.children, true);
+
+            // Push intersections to the array
+            allIntersections.push(...intersects);
+        }
+
+        // Sort intersections by distance
+        allIntersections.sort((a, b) => a.distance - b.distance);
+
+        // If there are intersections
+        if (allIntersections.length > 0) {
+            // The first intersection will be the nearest object
+            var nearestObject = allIntersections[0].object;
+            console.log("Nearest object:", nearestObject);
+        } else {
+            console.log("No intersections found.");
+        }
     }
 }

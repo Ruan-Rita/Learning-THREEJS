@@ -51,8 +51,8 @@ scene.add(axesHelper);
 
 camera.position.set(5,3,18)
 controls.update();
-const renderCube = new RenderCube(scene, gui);
-const {axesPurple, axesYellow} = renderCube.render()
+const renderCube = new RenderCube(scene, gui, camera);
+const {axesPurple, axesYellow, axesBrown} = renderCube.render()
 
 window.addEventListener('resize', function() {
     camera.aspect = window.innerWidth / this.window.innerHeight;
@@ -62,36 +62,8 @@ window.addEventListener('resize', function() {
 
 renderer.setClearColor( 0x000000, 0 );
 
-const options = {
-    'YellowRotation': false,
-    'PurpleRotation': false,
-}
-let speedYellow = 0
-
-gui.add(options,'YellowRotation').onChange(value => {
-    if (value) {
-        speedYellow = -0.0015
-    } else {
-        speedYellow = 0
-        const euler = new THREE.Euler(0,0,0)
-        axesYellow.setRotationFromEuler(euler)
-    }
-});
-let speedPurple = 0
-gui.add(options,'PurpleRotation').onChange(value => {
-    if (value) {
-        speedPurple = 0.0015
-    } else {
-        speedPurple = 0
-        const euler = new THREE.Euler(0,0,0)
-        axesPurple.setRotationFromEuler(euler)
-    }
-});
-
 // animation
 function animate(time) {
     renderer.render(scene, camera)
-    axesPurple.rotateX(speedPurple)
-    axesYellow.rotateX(speedYellow)
 }
 renderer.setAnimationLoop(animate)
