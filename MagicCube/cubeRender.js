@@ -205,6 +205,89 @@ export default class RenderCube {
         });
     }
 
+    /**
+     * Function: Determine the number relative to its angle based on the base form where numberCube 2 represents the north, or starting point
+     * of the representation of how the cube was developed
+     *
+     * Params:
+     * - numberCube: The number of the cube on the X axis that will find its position based on the angle on the same axis
+     * - angle: The angle of the axis
+     *
+     * Represetation
+     *     0º          90º         180º          270º
+     * [1][N][3]    [7][4][1]    [9][8][7]    [3][6][9]
+     * [4][C][6] -> [8][C][N] -> [6][C][4] -> [N][C][8] -> 0º
+     * [7][8][9]    [9][6][3]    [3][N][1]    [1][4][7]
+     */
+    getNumberCubeByAngle(numberCube, angle) {
+        const direction = this.determineNorthDirection(angle);
+        console.log(`NumCube ${numberCube} e ${direction}`)
+        if (direction === 'top') return numberCube;
+        if (direction === 'right') {
+            switch (numberCube) {
+                case 1: return 7;
+                case 2: return 4;
+                case 3: return 1;
+                case 4: return 8;
+                case 6: return 2;
+                case 7: return 9;
+                case 8: return 6;
+                case 9: return 3;
+                default: return numberCube;
+            }
+        }
+        if (direction === 'bottom') {
+            switch (numberCube) {
+                case 1: return 9;
+                case 2: return 8;
+                case 3: return 7;
+                case 4: return 6;
+                case 6: return 4;
+                case 7: return 3;
+                case 8: return 2;
+                case 9: return 1;
+                default: return numberCube;
+            }
+        }
+        if (direction === 'left') {
+            switch (numberCube) {
+                case 1: return 3;
+                case 2: return 6;
+                case 3: return 9;
+                case 4: return 2;
+                case 6: return 8;
+                case 7: return 1;
+                case 8: return 4;
+                case 9: return 7;
+                default: return numberCube;
+            }
+        }
+    }
+
+    /**
+     *  Function: indicates where north is on an axis
+     *
+     *  Params:
+     *  - angle: euler.x or euler.y or euler.z
+     *
+     *  return 'top'|'right'|'bottom'|'left'
+     */
+    determineNorthDirection(angle) {
+        // Convert the rotation angle from radians to degrees
+        const angleDegrees = angle * (180 / Math.PI);
+
+        // Determine the direction of north based on the rotation angle
+        if (angleDegrees >= -45 && angleDegrees < 45) {
+            return 'top';
+        } else if (angleDegrees >= 45 && angleDegrees < 135) {
+            return 'right';
+        } else if (angleDegrees >= 135 || angleDegrees < -135) {
+            return 'bottom';
+        } else if (angleDegrees >= -135 && angleDegrees < -45) {
+            return 'left';
+        }
+    }
+
     moveBrown() {
         this.axesBrown.axes.add(this.boxYellow3.box)
         this.axesBrown.axes.add(this.boxYellow6.box)
@@ -232,22 +315,27 @@ export default class RenderCube {
         for (let i = 0; i < arrayAxes.length; i++) {
             let relationName;
             let currentPositionAxes;
+            let rotationEuler = 'x'
 
             if (related == 'Brown') {
                 if (arrayAxes[i].axes.name == 'Red') {
                     relationName = 'BrownRed';
+                    rotationEuler = 'y'
                     currentPositionAxes = this.positionAxes.axesRed
                 }
                 if (arrayAxes[i].axes.name == 'Yellow') {
                     relationName = 'BrownYellow';
+                    rotationEuler = 'x'
                     currentPositionAxes = this.positionAxes.axesYellow
                 }
                 if (arrayAxes[i].axes.name == 'Purple') {
                     relationName = 'BrownPurple';
+                    rotationEuler = 'x'
                     currentPositionAxes = this.positionAxes.axesPurple
                 }
                 if (arrayAxes[i].axes.name == 'Gray') {
                     relationName = 'BrownGray';
+                    rotationEuler = 'y'
                     currentPositionAxes = this.positionAxes.axesGreen
                 }
 
@@ -262,7 +350,11 @@ export default class RenderCube {
                     for (let iterate = 0; iterate < arrayAxes[i].axes.children.length; iterate++) {
                         const searchCube = arrayAxes[i].axes.children[iterate];
                         console.log("Cubos", arrayAxes[i].axes.children)
-                        let {x,y,z} = currentPositionAxes[numberCubeThisCurrentAxes];
+                        console.log("AXES IS ", arrayAxes[i].axes);
+                        let a = this.getNumberCubeByAngle(numberCubeThisCurrentAxes,arrayAxes[i].axes.rotation['x'] );
+                        console.log('getNumberCubeByAngle Result: ' + a);
+
+                        let {x,y,z} = currentPositionAxes[a];
                         console.log({x,y,z}, 'eles é a posicao do red que eu quero');
                         if (searchCube.position.x == x && searchCube.position.y == y && searchCube.position.z == z  ) {
                             foundCube = searchCube;
