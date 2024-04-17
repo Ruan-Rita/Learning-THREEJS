@@ -28,6 +28,7 @@ export default class RenderCube {
      */
     positionAxes = {
         axesYellow: {
+            name: 'Yellow',
             1: {x: 0,y: this.margem, z: - this.margem},
             2: {x: 0,y: this.margem, z: 0},
             3: {x: 0,y: this.margem, z: this.margem},
@@ -38,6 +39,7 @@ export default class RenderCube {
             9: {x: 0,y: -this.margem, z: this.margem},
         },
         axesPurple: {
+            name: 'Purple',
             1: {x: 0,y: this.margem, z: this.margem},
             2: {x: 0,y: this.margem, z: 0},
             3: {x: 0,y: this.margem, z: -this.margem},
@@ -48,6 +50,7 @@ export default class RenderCube {
             9: {x: 0,y: -this.margem, z: -this.margem},
         },
         axesGray: {
+            name: 'Gray',
             1: {x: this.margem, y: 0, z: this.margem},
             2: {x: this.margem, y: 0, z: 0},
             3: {x: this.margem, y: 0, z: -this.margem},
@@ -58,6 +61,7 @@ export default class RenderCube {
             9: {x: -this.margem, y: 0, z: -this.margem},
         },
         axesRed: {
+            name: 'Red',
             1: {x: -this.margem, y: 0, z: this.margem},
             2: {x: -this.margem, y: 0, z: 0},
             3: {x: -this.margem, y: 0, z: -this.margem},
@@ -68,6 +72,7 @@ export default class RenderCube {
             9: {x: this.margem, y: 0, z: -this.margem},
         },
         axesGreen: {
+            name: 'Green',
             1: {x: this.margem,y: this.margem,z: 0},
             2: {x: 0,y: this.margem,z: 0},
             3: {x: -this.margem,y: this.margem,z: 0},
@@ -78,6 +83,7 @@ export default class RenderCube {
             9: {x: -this.margem,y: -this.margem,z: 0},
         },
         axesBrown: {
+            name: 'Brown',
             1: {x: -this.margem,y: this.margem,z: 0},
             2: {x: 0,y: this.margem,z: 0},
             3: {x: this.margem,y: this.margem,z: 0},
@@ -100,6 +106,14 @@ export default class RenderCube {
         this.axesBrown = this.createBox(this.mainCube.box, 'brown',{x: 0, y: 0, z: this.margem}, true);
         this.axesYellow = this.createBox(this.mainCube.box, 'yellow',{x: -this.margem, y: 0, z: 0}, true);
         this.axesGreen = this.createBox(this.mainCube.box, 'green',{x: 0, y: 0, z: -this.margem}, true);
+
+        // names
+        this.axesRed.axes.name = 'Red';
+        this.axesPurple.axes.name = 'Purple';
+        this.axesGray.axes.name = 'Gray';
+        this.axesBrown.axes.name = 'Brown';
+        this.axesYellow.axes.name = 'Yellow';
+        this.axesGreen.axes.name = 'Green';
 
         // AxesPurple
         this.box1 = this.createBox(this.axesPurple.axes, 'purple',this.positionAxes.axesPurple[1]);
@@ -150,7 +164,7 @@ export default class RenderCube {
         let zPurple = 0
         let zGray = 0
         let zGreen = 0
-        const degree = 10;
+        const degree = 90;
 
         this.gui.add(this.options,'ActionPurple').onChange(value => {
             this.movePurple()
@@ -171,13 +185,14 @@ export default class RenderCube {
             this.axesGray.axes.setRotationFromEuler(euler)
         });
         this.gui.add(this.options,'ActionBrown').onChange(value => {
-            this.moveBrown();
+            this.moveBrownImproved();
             zBrown += THREE.MathUtils.degToRad(degree);
             const euler = new THREE.Euler(0,0,zBrown, "XYZ")
             this.axesBrown.axes.setRotationFromEuler(euler)
         });
         this.gui.add(this.options,'ActionYellow').onChange(value => {
             this.moveYellow()
+            // this.moveYellowImproved()
             zYellow += THREE.MathUtils.degToRad(degree);
             const euler = new THREE.Euler(zYellow,0,0, "XYZ")
             this.axesYellow.axes.setRotationFromEuler(euler)
@@ -209,6 +224,175 @@ export default class RenderCube {
         this.axesBrown.axes.add(this.boxBrown8)
         this.help(this.boxBrown2.box, this.positionAxes.axesBrown[2])
         this.help(this.boxBrown8.box, this.positionAxes.axesBrown[8])
+        console.log('this.axesBrown', this.axesBrown.axes.children);
+    }
+
+    searchCube(related, arrayAxes, numberPosition) {
+        let foundCube = false
+        for (let i = 0; i < arrayAxes.length; i++) {
+            let relationName;
+            let currentPositionAxes;
+
+            if (related == 'Brown') {
+                if (arrayAxes[i].axes.name == 'Red') {
+                    relationName = 'BrownRed';
+                    currentPositionAxes = this.positionAxes.axesRed
+                }
+                if (arrayAxes[i].axes.name == 'Yellow') {
+                    relationName = 'BrownYellow';
+                    currentPositionAxes = this.positionAxes.axesYellow
+                }
+                if (arrayAxes[i].axes.name == 'Purple') {
+                    relationName = 'BrownPurple';
+                    currentPositionAxes = this.positionAxes.axesPurple
+                }
+                if (arrayAxes[i].axes.name == 'Gray') {
+                    relationName = 'BrownGray';
+                    currentPositionAxes = this.positionAxes.axesGreen
+                }
+
+                let relation = this.positionRelation[relationName];
+                let numberCubeThisCurrentAxes = relation[numberPosition];
+
+                console.log('positionAxes da relacao brom com '+relationName)
+                console.log('Brown Position: '+ numberPosition);
+                console.log(relationName +' Position: '+ numberCubeThisCurrentAxes);
+
+                if (numberCubeThisCurrentAxes) {
+                    for (let iterate = 0; iterate < arrayAxes[i].axes.children.length; iterate++) {
+                        const searchCube = arrayAxes[i].axes.children[iterate];
+                        console.log("Cubos", arrayAxes[i].axes.children)
+                        let {x,y,z} = currentPositionAxes[numberCubeThisCurrentAxes];
+                        console.log({x,y,z}, 'eles é a posicao do red que eu quero');
+                        if (searchCube.position.x == x && searchCube.position.y == y && searchCube.position.z == z  ) {
+                            foundCube = searchCube;
+                            arrayAxes[i].axes.remove(foundCube)
+                            break;
+                        }
+                    }
+                }
+            }
+            if (foundCube) {
+                break;
+            }
+        }
+        return foundCube;
+    }
+    positionRelation = {
+        BrownRed: {
+            1: 1,
+            2: 4,
+            3: 7,
+        },
+        BrownYellow: {
+            1: 3,
+            4: 6,
+            7: 9
+        },
+        BrownPurple: {
+            3: 1,
+            6: 4,
+            9: 7
+        },
+        BrownGray: {
+            7: 1,
+            8: 4,
+            9: 7
+        }
+    }
+    moveBrownImproved() {
+        //             red
+        //              |
+        // yellow  <-  brown  ->  purple
+        //              |
+        //             gray
+        const cubes = {}
+        const ajustPosition = []
+        console.log('Start search cubes in axesBrown', cubes)
+
+        for (let iterate = 0; iterate < this.axesBrown.axes.children.length; iterate++) {
+            const cube = this.axesBrown.axes.children[iterate];
+            Object.keys(this.positionAxes.axesBrown).forEach(numberCube => {
+                let {x,y,z} = this.positionAxes.axesBrown[numberCube]
+                if (cube.position.x == x && cube.position.y == y && cube.position.z == z  ) {
+                    cubes[numberCube] = cube;
+                }
+            })
+        }
+        console.log('Find current cubes in axes brown', cubes)
+        if (Object.keys(this.positionAxes.axesBrown).length !== 8) {
+            // which cubes are they missing?
+            for (let i = 1; i <= 9; i++) {
+                // axes
+                if (i==5) continue;
+                // found cube
+                console.log('Found Cube', cubes[i])
+                if (cubes[i]) continue;
+                cubes[i] = this.searchCube('Brown', [
+                    this.axesRed, this.axesYellow, this.axesPurple, this.axesGray
+                ], i);
+                ajustPosition[i] = this.positionAxes.axesBrown[i]
+                // console.log('After search: cubes[i]', cubes[i])
+            }
+        }
+        console.log('LOGG final quanto cubos foram achados', cubes);
+
+        for (let i = 1; i <= 9; i++) {
+            // axes
+            if (i==5) continue;
+            console.log('so para saber', cubes[i]);
+            this.axesBrown.axes.add(cubes[i]);
+            if (ajustPosition[i]) {
+                this.help(cubes[i], ajustPosition[i])
+            }
+        }
+    }
+    moveYellowImproved() {
+        //             red
+        //              |
+        // green  <-  yellow  ->  Brown
+        //              |
+        //             gray
+        const cubes = {}
+        const ajustPosition = []
+        console.log('Start search cubes in axesYellow', cubes)
+
+        for (let iterate = 0; iterate < this.axesYellow.axes.children.length; iterate++) {
+            const cube = this.axesYellow.axes.children[iterate];
+            Object.keys(this.positionAxes.axesYellow).forEach(numberCube => {
+                let {x,y,z} = this.positionAxes.axesYellow[numberCube]
+                if (cube.position.x == x && cube.position.y == y && cube.position.z == z  ) {
+                    cubes[numberCube] = cube;
+                }
+            })
+        }
+        console.log('Find current cubes in axes yellow', cubes)
+        if (Object.keys(this.positionAxes.axesYellow).length !== 8) {
+            // which cubes are they missing?
+            for (let i = 1; i <= 9; i++) {
+                // axes
+                if (i==5) continue;
+                // found cube
+                console.log('Found Cube', cubes[i])
+                if (cubes[i]) continue;
+                cubes[i] = this.searchCube('Yellow', [
+                    this.axesRed, this.axesYellow, this.axesPurple, this.axesGray
+                ], i);
+                ajustPosition[i] = this.positionAxes.axesYellow[i]
+                // console.log('After search: cubes[i]', cubes[i])
+            }
+        }
+        console.log('LOGG final quanto cubos foram achados', cubes);
+
+        for (let i = 1; i <= 9; i++) {
+            // axes
+            if (i==5) continue;
+            console.log('so para saber', cubes[i]);
+            this.axesYellow.axes.add(cubes[i]);
+            if (ajustPosition[i]) {
+                this.help(cubes[i], ajustPosition[i])
+            }
+        }
     }
     moveGreen() {
         this.axesGreen.axes.add(this.boxYellow1.box)
@@ -292,6 +476,7 @@ export default class RenderCube {
         this.help(this.box9.box, this.positionAxes.axesPurple[9])
     }
     moveYellow() {
+        console.log('ASsim e o yellow', this.boxYellow1.box)
         this.axesYellow.axes.add(this.boxYellow1.box)
         this.axesYellow.axes.add(this.boxYellow2.box)
         this.axesYellow.axes.add(this.boxYellow3.box)
